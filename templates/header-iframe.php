@@ -21,11 +21,11 @@ add_filter('body_class', 'add_classes_to_body');
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width">
 <title><?php wp_title(); ?></title>
-<meta name="date" content="<?= date('Ymd',strtotime($post->post_date)); ?>">
+<meta name="date" content="<?php echo date('Ymd',strtotime($post->post_date)); ?>">
 <link href="<?=get_template_directory_uri();?>/img/favicon.png" rel="shortcut icon" type="image/x-icon"/>
-<? wp_head(); ?>
+<?php wp_head(); ?>
 
-<? do_action('iframe_header_content'); ?>
+<?php do_action('iframe_header_content'); ?>
 </head>
 <!--googleoff: index-->
 <body <?php body_class(); ?>>
