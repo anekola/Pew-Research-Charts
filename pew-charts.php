@@ -9,7 +9,7 @@ Author: Adam Nekola and Russell Heimlich
 
 /* ---------------------------------------------- */
 /* array_replace_recursive is PHP 5.3 and greater */
-/* http://php.net/manual/en/function.array-replace-recursive.php 
+/* http://php.net/manual/en/function.array-replace-recursive.php
 /* ---------------------------------------------- */
 
 if (!function_exists('array_replace_recursive')){
@@ -23,7 +23,7 @@ if (!function_exists('array_replace_recursive')){
 	        {
 	          $array[$key] = array();
 	        }
-	  
+
 	        // overwrite the value in the base array
 	        if (is_array($value))
 	        {
@@ -34,7 +34,7 @@ if (!function_exists('array_replace_recursive')){
 	      return $array;
 	    }
 	}
-  
+
     // handle the arguments, merge one by one
     $args = func_get_args();
     $array = $args[0];
@@ -162,16 +162,16 @@ function get_pew_charts_header( $name = null ) {
 /* -------------------------------------- */
 
 function pew_charts_scripts(){
-	if ( !wp_script_is( 'highcharts', 'registered' ) ) 
+	if ( !wp_script_is( 'highcharts', 'registered' ) )
 		wp_register_script('highcharts', plugin_dir_url( __FILE__ ) . 'js/highcharts.min.js', array('jquery'), false, true);
 
-	if ( !wp_script_is( 'tinysort', 'registered' ) ) 
+	if ( !wp_script_is( 'tinysort', 'registered' ) )
 		wp_register_script('tinysort', plugin_dir_url( __FILE__ ) . 'js/tinysort.min.js', array('jquery'), false, true);
 
-	if ( !wp_script_is( 'waypoints', 'registered' ) ) 
+	if ( !wp_script_is( 'waypoints', 'registered' ) )
 		wp_register_script('waypoints', plugin_dir_url( __FILE__ ) . 'js/waypoints.min.js', array('jquery'), false, true);
 
-	if ( !wp_script_is( 'highcharts-regression', 'registered' ) ) 
+	if ( !wp_script_is( 'highcharts-regression', 'registered' ) )
 		wp_register_script('highcharts-regression', plugin_dir_url( __FILE__ ) . 'js/highcharts-regression.min.js', array('highcharts'), false, true);
 
 	wp_register_script('pew-charts', plugin_dir_url( __FILE__ ) . 'js/pew-charts.js', array('highcharts','tinysort'), false, true);
@@ -181,7 +181,7 @@ function pew_charts_scripts(){
 		wp_enqueue_script('pew-charts');
 		wp_enqueue_style('pew-charts');
 	}
-	
+
 }
 add_action('wp_enqueue_scripts', 'pew_charts_scripts');
 
@@ -199,16 +199,16 @@ function pew_chart_shortcode( $atts ) {
         'title' => false,
         'classes' => false
     ), $atts );
-	
+
 	$id = $a['id'];
 	$slug = $a['slug'];
 	$classes = $a['classes'];
-	
+
 	if ( !$id && !$slug ) {
 		//No ID or slug. We can't do anything with that so bail...
 		return '';
 	}
-	
+
 	$args = array(
 		'post_type' => 'chart',
 		'post_status' => 'publish',
@@ -217,20 +217,20 @@ function pew_chart_shortcode( $atts ) {
 	if( $id ) {
 		$args['p'] = $id;
 	}
-	
+
 	if( $slug ) {
 		$args['name'] = $slug;
 	}
-	
+
 	if( is_preview() || is_user_logged_in() ) {
 		$args['post_status'] = array('publish', 'pending', 'draft', 'future', 'private');
 	}
-	
+
 	$charts = get_posts( $args );
 	if( is_wp_error($charts) || !is_array($charts) || empty($charts) ) {
 		return '';
 	}
-	
+
 	$chart = $charts[0];
 	pew_chart_prep_chart_options( $chart );
 
@@ -240,20 +240,20 @@ function pew_chart_shortcode( $atts ) {
 	// Ability to customize
 	$classes = explode(',', $classes);
 	$classes = array_merge($classes, array('embedded_chart', 'chart' . $chart->ID));
-	$chart_addl_classes = apply_filters('chart_addl_classes', $classes, $atts); 
+	$chart_addl_classes = apply_filters('chart_addl_classes', $classes, $atts);
 	$chart_shortcode_title = apply_filters('chart_shortcode_title', ($a['title'] ? $a['title'] : get_the_title($chart->ID)));
-    
+
     // Now we print the title and the content
     $html = '<div class="' . implode(' ', $chart_addl_classes) . '">';
 	$html .= '<h3>' . $chart_shortcode_title . '</h3>';
 	$html .= wpautop(get_post_field('post_content', $chart->ID)); //Potential for infinite loop if the chart body has a [chart] shortcode in it.
-	
+
 	if ( current_user_can('edit_post', $chart->ID) ) {
 		$html .= '<p class="edit-chart"><a href="' . get_edit_post_link( $chart->ID ) . '" target="_blank">Edit Chart</a></p>';
 	}
-	
+
 	$html .= '</div>';
-	
+
 	$site_options = get_option( 'pew_charts' );
 	if( isset( $site_options['waypoints'] ) && !empty( $site_options['waypoints'] ) ) {
 		wp_enqueue_script('waypoints');
@@ -261,7 +261,7 @@ function pew_chart_shortcode( $atts ) {
 
 	wp_enqueue_script('pew-charts');
 	wp_enqueue_style('pew-charts');
-	
+
 	return $html;
 }
 add_shortcode( 'chart', 'pew_chart_shortcode' );
@@ -280,13 +280,13 @@ function get_pew_chart_meta( $chart_id = false ) {
 		$post = get_post();
 		$chart_id = $post->ID;
 	}
-	
+
 	//Use WordPress' caching functionality so if the same $chart_id is requested we can return the previous work we did...
 	$cache_key = 'pew_chart_options_' . $chart_id;
 	$data = wp_cache_get( $cache_key );
-	
+
 	if( !$data ) {
-		$data = get_post_meta( $chart_id, 'chart_meta', true ); 
+		$data = get_post_meta( $chart_id, 'chart_meta', true );
 		if ( !is_array($chart_meta) ) {
 			$chart_meta = array();
 		}
@@ -296,17 +296,17 @@ function get_pew_chart_meta( $chart_id = false ) {
 				$data[ $key ] = '';
 			}
 		}
-	
-		wp_cache_set( $cache_key, $data );	
+
+		wp_cache_set( $cache_key, $data );
 	}
-	
+
 	return $data;
 }
 
 
 function pew_chart_prep_chart_options( $chart = FALSE ) {
 	global $pew_chart_options;
-	
+
 	//Get site wide defaults
 	$site_options = get_option( 'pew_charts' );
 	if( isset( $site_options['defaults'] ) && !empty( $site_options['defaults'] ) ) {
@@ -315,13 +315,13 @@ function pew_chart_prep_chart_options( $chart = FALSE ) {
 	if( !$default_options ) {
 		$default_options = array();
 	}
-	
+
 	//$chart is a $post object
 	if( !$chart ) {
 		$site_options['waypoints'] = false;
 		$chart = get_post();
 	}
-	
+
 	//Get chart options
 	$options = get_pew_chart_meta( $chart->ID );
 	if( isset( $options['args'] ) && !empty( $options['args'] ) ) {
@@ -335,7 +335,7 @@ function pew_chart_prep_chart_options( $chart = FALSE ) {
 	if( !$custom_chart_options ) {
 		$custom_chart_options = array();
 	}
-	
+
 	$chart_options = array(
 		'chart' => array(),
 		'subtitle' => array(),
@@ -408,30 +408,30 @@ function pew_chart_prep_chart_options( $chart = FALSE ) {
 		'data_tab' => _('Data'),
 		'chart_tab' => _('Chart'),
 		'height' => ( $options['chartheight'] && preg_match('/[0-9]+([px]{2}|)$/i', $options['chartheight']) ? str_replace(array('px','PX'),'',$options['chartheight']).'px' : '400px'),
-		
+
 		'iframe' => $options['iframe'],
 		'iframe_tab' => _('Embed'),
 		'iframe_text' => _('Copy and paste the below iframe code into your own website to embed this chart.'),
-		
+
 		'URL' => get_permalink( $chart->ID ),
 		'id' => $chart->ID,
 		'domain' =>	get_site_url(),
-		
+
 		'credits' => ($options['credits'] ? $options['credits'] : $site_options['credits']),
 		'creditsURL' => ($options['credits_link'] ? $options['credits_link'] : $site_options['credits_link']),
 		'creditText' => _('Source: ')
 	);
- 	
+
 	$js_options = array_replace_recursive( (array) $default_options, $chart_options, (array) $custom_chart_options );
 	$js_options = apply_filters( 'pew_chart_options', $js_options, $chart );
-	
+
 	$pew_chart_options[] = json_encode( $js_options );
 }
 
 function print_pew_chart_options() {
 	global $pew_chart_options;
 	$post = get_post();
-	
+
 	if( is_admin() ||
 		is_home() ||
 		!is_single() &&
@@ -440,29 +440,29 @@ function print_pew_chart_options() {
 	) {
 		return;
 	}
-	
+
 ?>
 <script>
 jQuery(document).ready(function($) {
 	var pewChartOptions = [<?php echo implode( $pew_chart_options, ', ' ); ?>];
 	$('table.pew-chart').each(function(index, table) {
-		
+
 		//Having the debugbar plugin enabled can pickup extra tables and wreak havoc...
 		if( index >= pewChartOptions.length ) {
 			return true;
 		}
-		
+
 		$table = $(table);
 		if( pewChartOptions[index].chart.type == 'none' ) {
 			return true; //Skip this iteration and go on to the next one.
 		}
-		
+
 		new Highcharts.visualize( $table, pewChartOptions[index] );
 	});
-	
+
 });
 </script>
-<?php 
+<?php
 }
 add_action( 'wp_footer', 'print_pew_chart_options', 99 );
 
