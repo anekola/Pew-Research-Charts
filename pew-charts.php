@@ -243,14 +243,17 @@ function pew_chart_shortcode( $atts ) {
 	$chart_addl_classes = apply_filters('chart_addl_classes', $classes, $atts);
 	$chart_shortcode_title = apply_filters('chart_shortcode_title', ($a['title'] ? $a['title'] : get_the_title($chart->ID)));
 
-    // Now we print the title and the content
-    $html = '<div class="' . implode(' ', $chart_addl_classes) . '">';
+  // Now we print the title and the content
+  $html = '<div class="' . implode(' ', $chart_addl_classes) . '">';
+
+	if ( current_user_can('edit_post', $chart->ID) ) {
+		$chart_shortcode_title .= ' | <a href="' . get_edit_post_link( $chart->ID ) . '" target="_blank">Edit</a>';
+	}
+
 	$html .= '<h3>' . $chart_shortcode_title . '</h3>';
 	$html .= wpautop(get_post_field('post_content', $chart->ID)); //Potential for infinite loop if the chart body has a [chart] shortcode in it.
 
-	if ( current_user_can('edit_post', $chart->ID) ) {
-		$html .= '<p class="edit-chart"><a href="' . get_edit_post_link( $chart->ID ) . '" target="_blank">Edit Chart</a></p>';
-	}
+
 
 	$html .= '</div>';
 
