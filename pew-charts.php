@@ -197,7 +197,9 @@ function pew_chart_shortcode( $atts ) {
         'id' => 0,
         'slug' => false,
         'title' => false,
-        'classes' => false
+        'classes' => false,
+        'width' => 'none',
+        'float' => 'none'
     ), $atts );
 
 	$id = $a['id'];
@@ -242,9 +244,11 @@ function pew_chart_shortcode( $atts ) {
 	$classes = array_merge($classes, array('embedded_chart', 'chart' . $chart->ID));
 	$chart_addl_classes = apply_filters('chart_addl_classes', $classes, $atts);
 	$chart_shortcode_title = apply_filters('chart_shortcode_title', ($a['title'] ? $a['title'] : get_the_title($chart->ID)));
+	$margin = ($a['float'] == 'left' ? '0 30px 0 0' : ($a['float'] == 'right' ? '0 0 0 30px' : '0'));
+	$chart_contain_style = apply_filters('chart_contain_style', 'max-width:'.$a['width'].'; float:'.$a['float'].'; margin:'.$margin);
 
   // Now we print the title and the content
-  $html = '<div class="' . implode(' ', $chart_addl_classes) . '">';
+  $html = '<div class="' . implode(' ', $chart_addl_classes) . '" style="'.$chart_contain_style.'">';
 
 	if ( current_user_can('edit_post', $chart->ID) ) {
 		$chart_shortcode_title .= ' | <a href="' . get_edit_post_link( $chart->ID ) . '" target="_blank">Edit</a>';
