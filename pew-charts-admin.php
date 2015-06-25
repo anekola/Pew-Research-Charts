@@ -312,7 +312,7 @@ class ChartSettingsPage
             $new_input['credits'] = sanitize_text_field( $input['credits'] );
 
         if( isset( $input['iframe'] ) )
-            $new_input['iframe'] = sanitize_text_field( $input['iframe'] );
+            $new_input['iframe'] = $input['iframe'];
 
         if( isset( $input['defaults'] ) )
             $new_input['defaults'] = sanitize_text_field( $input['defaults'] );
@@ -345,8 +345,8 @@ class ChartSettingsPage
     public function iframe_callback()
     { ?>
         <select id="iframe" name="pew_charts[iframe]">
-        	<option <?php selected('disable', $this->options['iframe']); ?> value="disabled">Disabled by default</option>
-        	<option <?php selected('enable', $this->options['iframe']); ?> value="enabled">Enabled by default</option>
+        	<option <?php selected('disabled', $this->options['iframe']); ?> value="disabled">Disabled by default</option>
+        	<option <?php selected('enabled', $this->options['iframe']); ?> value="enabled">Enabled by default</option>
         </select>
     <?php }
 
