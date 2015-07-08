@@ -82,7 +82,7 @@ function pew_charts_init() {
 		'label'               => 'charts',
 		'description'         => 'charts',
 		'labels'              => $labels,
-		'supports'            => array( 'title', 'editor', 'thumbnail', 'author'),
+		'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'author'),
 		'hierarchical'        => false,
 		'public'              => true,
 		'show_ui'             => true,
