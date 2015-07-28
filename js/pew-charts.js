@@ -159,11 +159,20 @@ jQuery(document).ready(function($) {
 		options.series = columns;
 
 		options.tooltip.formatter = function() {
+			var string = '<strong>'+ tooltipDateFormat(this.x) +'</strong><br/>';
+			if ( this.points.length > 1 ) {
+				points = this.points;
+				for(index = 0; index < points.length; index += 1) {
+					value = points[index].y;
+					if (points[index].y == null) value = 'N/A';
+					string = string + '<span style="color:' + points[index].series.color + ';">' + points[index].series.name + '</span>' + ': ' + value+'<br/>';
+				}
+			} else {
 				var i = this.series.data.indexOf( this.point );
 				var colorIndex = this.series.index;
-
-				return '<strong>'+ tooltipDateFormat( this.x ) +'</strong><br/>'+
-					'<span style="color:' + options.colors[ colorIndex ] + ';">' + this.series.name + '</span>' + ': ' + this.series.options.displayData[i];
+				string = string + '<span style="color:' + options.colors[ colorIndex ] + ';">' + this.series.name + '</span>' + ': ' + this.series.options.displayData[i];
+			}
+			return string;
 		}
 
 		return options;
@@ -286,13 +295,97 @@ jQuery(document).ready(function($) {
 		});
 
 		options.tooltip.formatter = function() {
-				var i = this.series.data.indexOf( this.point );
-				var colorIndex = this.series.index;
-
-				return '<strong>'+ this.x +'</strong><br/>'+
-					'<span style="color:' + options.colors[ colorIndex ] + ';">' + this.series.name + '</span>' + ': ' + this.series.options.displayData[i];
+				var string = '<strong>'+ this.x +'</strong><br/>';
+				if ( this.points.length > 1 ) {
+					points = this.points;
+					for(index = 0; index < points.length; index += 1) {
+						value = points[index].y;
+						if (points[index].y == null) value = 'N/A';
+						string = string + '<span style="color:' + points[index].series.color + ';">' + points[index].series.name + '</span>' + ': ' + value+'<br/>';
+					}
+				} else {
+					var i = this.series.data.indexOf( this.point );
+					var colorIndex = this.series.index;
+					string = string + '<span style="color:' + options.colors[ colorIndex ] + ';">' + this.series.name + '</span>' + ': ' + this.series.options.displayData[i];
+				}
+				return string;
 		}
 
+		return options;
+	}
+
+
+	function process_scatter_data($table, options) {
+
+		// the data series
+		options.series = [];
+		ourSeries = [];
+		$('tr', $table).each( function(row) {
+			var tr = this;
+			var point = [];
+
+			if (row == 0) return true;
+
+			$('th, td', tr).each( function(column) {
+				point['series'] = 'All';
+				// Name of point
+				if (column == 0) {
+					point['name'] = $.trim(this.innerHTML);
+				}
+				// Name of series
+				else if (column == 3) {
+					point['series'] = $.trim(this.innerHTML);
+				}
+				// Coordinates
+				else {
+					// Get a number that Highcharts can work with stripping out fancy formatting cruft
+					var cell = this.innerHTML.replace(/[><%,\$¢£#!@^&*\+\(\)]/g, '');
+					if( parseFloat(cell) ) {
+						// The number is a legit number (a Float)
+						if( cell < 0 && !isNaN( cell ) ) {
+							options.hasNegativeValues = true;
+						}
+						value = parseFloat(cell);
+					} else {
+						// Not a legit number so we push null to the data point in this series.
+						value = null;
+					}
+					// X
+					if (column == 1) {
+						point['x'] = value;
+					}
+					// Y
+					else {
+						point['y'] = value;
+					}
+				}
+			});
+
+			// Find series in category list
+			seriesID = $.inArray( point['series'], ourSeries );
+			if ( seriesID == -1 ){
+				ourSeries.push(point['series']);
+				options.series.push( {
+					name: point['series'],
+					data: [{
+						name: point['name'],
+						x: point['x'],
+						y: point['y']
+					}]
+				} );
+			}
+			// Add the point
+			else {
+				var pointData = {
+					name: point['name'],
+					x: point['x'],
+					y: point['y']
+				};
+				options.series[seriesID].data.push( pointData );
+			}
+
+		});
+console.log(options);
 		return options;
 	}
 
@@ -394,7 +487,6 @@ jQuery(document).ready(function($) {
 			colors: ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
 		};
 
-		options = $.extend(true, default_options, options);
 
 		if( options.xAxis.type == 'datetime' ) {
 
@@ -402,16 +494,17 @@ jQuery(document).ready(function($) {
 			//$('#data th a').eq(0).addClass('datetime');
 
 		} else if( options.chart.type == 'pie' ) {
-
 			//Pie charts need the data to be formatted a certain way.
 			options = process_pie_chart_data($table, options);
 			options.tooltip.enabled = false;
-
+		} else if( options.chart.type == 'scatter' ){
+			options = process_scatter_data($table, options);
 		} else {
 			options = process_category_data($table, options);
 		}
 
 		if( options.series.length < 2 ) {
+			if ( !options.legend ) options.legend = [];
 			options.legend.enabled = false;
 		}
 
@@ -421,6 +514,8 @@ jQuery(document).ready(function($) {
 		}
 
 		$target = $table.parent().siblings('.chart_toggle_content').eq(0);
+
+		options = $.extend(true, default_options, options);
 
 		// Draw the chart
 		if (options.html.waypoints) {
