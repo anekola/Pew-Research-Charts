@@ -158,6 +158,7 @@ jQuery(document).ready(function($) {
 		columns.splice(0, 1);
 		options.series = columns;
 
+		if ( !options.tooltip ) options.tooltip = [];
 		options.tooltip.formatter = function() {
 			var string = '<strong>'+ tooltipDateFormat(this.x) +'</strong><br/>';
 			if ( this.points.length > 1 ) {
@@ -294,6 +295,7 @@ jQuery(document).ready(function($) {
 			});
 		});
 
+		if ( !options.tooltip ) options.tooltip = [];
 		options.tooltip.formatter = function() {
 				var string = '<strong>'+ this.x +'</strong><br/>';
 				if ( this.points.length > 1 ) {
@@ -385,7 +387,7 @@ jQuery(document).ready(function($) {
 			}
 
 		});
-console.log(options);
+
 		return options;
 	}
 
@@ -499,6 +501,13 @@ console.log(options);
 			options.tooltip.enabled = false;
 		} else if( options.chart.type == 'scatter' ){
 			options = process_scatter_data($table, options);
+			options.tooltip = {
+				formatter: function() {
+						return '<b>'+ this.point.name +'</b><br/>'+
+						this.series.name;
+				}
+			};
+
 		} else {
 			options = process_category_data($table, options);
 		}
