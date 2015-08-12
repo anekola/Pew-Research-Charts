@@ -187,7 +187,7 @@ jQuery(document).ready(function($) {
 		});
 
 		// the data series
-		options.series = [];
+		if (!options.series) options.series = [];
 		$('tr', $table).each( function(row) {
 			var $tr = $(this);
 
@@ -196,11 +196,10 @@ jQuery(document).ready(function($) {
 				$cell = $(cell);
 				if( row == 0 ) {
 					if( column > 0 ) {
-						options.series.push({
-							name: $cell.text(),
-							data: [],
-							displayData: []
-						});
+						if (!options.series[column-1]) options.series[column-1] = [];
+						options.series[column-1].name = $cell.text();
+						options.series[column-1].data = [];
+						options.series[column-1].displayData = [];
 					}
 				} else {
 					if( column == 0 ) {
@@ -245,6 +244,7 @@ jQuery(document).ready(function($) {
 			}
 		};
 
+		console.log(options);
 		return options;
 	}
 
@@ -498,8 +498,10 @@ jQuery(document).ready(function($) {
 		} else if( options.chart.type == 'pie' ) {
 			//Pie charts need the data to be formatted a certain way.
 			options = process_pie_chart_data($table, options);
+			if ( !options.tooltip ) options.tooltip = [];
 			options.tooltip.enabled = false;
 		} else if( options.chart.type == 'scatter' ){
+			//Scatter table is unique, as it requires X and Y coordinates
 			options = process_scatter_data($table, options);
 			options.tooltip = {
 				formatter: function() {
