@@ -1,6 +1,8 @@
 # Pew Research Charts
 The Pew Research Charts WordPress plugin creates a custom post type which allows producers to insert an HTML table of data and transform it into an interactive chart.
 
+At the Pew Research Center, we had been building our interactive graphics with Highcharts for some time. We wanted a scalable way to create these that involved minimal developer time. This plugin makes it easy for producers to add data and have a chart that conforms with global styles, yet also provides the flexibility to customize each chart to an extent.
+
 ##Table format
 Each chart post type is created with default table html. The `<table>` element must include the class `pew-chart`. Easily convert your Excel data into HTML rows using [Tableizer](http://tableizer.journalistopia.com/).
 
