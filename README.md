@@ -2,10 +2,10 @@
 The Pew Research Charts WordPress plugin creates a custom post type which allows producers to insert an HTML table of data and transform it into an interactive chart.
 
 ##Table format
-Each chart post type is created with default table html. The `&lt;table&gt;` element must include the class `pew-chart`. Easily convert your Excel data into HTML rows using [Tableizer](http://tableizer.journalistopia.com/).
+Each chart post type is created with default table html. The `<table>` element must include the class `pew-chart`. Easily convert your Excel data into HTML rows using [Tableizer](http://tableizer.journalistopia.com/).
 
 ##Table options
-You may add a `data-color` attribute to any `&lt;th&gt;` element in order to override the color for that series. The value must be a hex code.
+You may add a `data-color` attribute to any `<th>` element in order to override the color for that series. The value must be a hex code.
 
 ##Chart Settings
 * **Chart types**: Supported types include line, bar, column, area, pie and scatter.
@@ -19,7 +19,7 @@ You may add a `data-color` attribute to any `&lt;th&gt;` element in order to ove
 ```
 
 ##Site-wide Settings
-These may be found in the WordPress admin under "Settings -&gt; Chart Settings."
+These may be found in the WordPress admin under "Settings -> Chart Settings."
 * **Credits** will add a default source attribution to all charts. Particularly useful if an organization creates it's own data.
 * **iFrames** will add an "embed" tab above every chart next to the "data" tab. This tab will provide iframe code so users may embed the chart on their own websites.
 * **Waypoints** will draw charts when they enter the user's viewport. Only applies on non-chart post types; most useful when adding several shortcodes to a single post.
@@ -47,19 +47,19 @@ Note that "chart slug" only works if the chart has been published previously or 
 * **pew_chart_options** is called after applying all the Highcharts settings and arg fields. It also includes an `html` field which is used to insert tabs and text around a chart. Default values include:
 ```
 $chart_options['html'] = array(
-		'waypoints' =&gt; false,
-		'data_tab' =&gt; _('Data'),
-		'chart_tab' =&gt; _('Chart'),
-		'height' =&gt; '400px',
-		'iframe' =&gt; false,
-		'iframe_tab' =&gt; _('Embed'),
-		'iframe_text' =&gt; _('Copy and paste the below iframe code into your own website to embed this chart.'),
-		'URL' =&gt; get_permalink( $chart-&gt;ID ),
-		'id' =&gt; $chart-&gt;ID,
-		'domain' =&gt; get_site_url(),
-		'credits' =&gt; '',
-		'creditsURL' =&gt; '',
-		'creditText' =&gt; _('Source: ')
+		'waypoints' => false,
+		'data_tab' => _('Data'),
+		'chart_tab' => _('Chart'),
+		'height' => '400px',
+		'iframe' => false,
+		'iframe_tab' => _('Embed'),
+		'iframe_text' => _('Copy and paste the below iframe code into your own website to embed this chart.'),
+		'URL' => get_permalink( $chart->ID ),
+		'id' => $chart->ID,
+		'domain' => get_site_url(),
+		'credits' => '',
+		'creditsURL' => '',
+		'creditText' => _('Source: ')
 	);
 ```
 
