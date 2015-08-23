@@ -1,16 +1,32 @@
 <?php
 /*
-Plugin Name: Pew Charts
-Description: Make HighCharts with a post type
-Version: 0.1
-Author: Adam Nekola and Russell Heimlich
+Plugin Name: Pew Research Charts
+Description: Interactive charts within WordPress are as easy as a custom post type
+Version: 	 0.5
+Author: 	 Adam Nekola and Russell Heimlich
+Author URI:  http://www.pewresearch.org
+License:     GPL2
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 
-/* ---------------------------------------------- */
-/* array_replace_recursive is PHP 5.3 and greater */
-/* http://php.net/manual/en/function.array-replace-recursive.php
-/* ---------------------------------------------- */
+
+/**
+ * Clear rewrite rules on activation
+ */
+
+function pew_charts_plugin_activate() {
+	pew_charts_init();
+	flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'pew_charts_plugin_activate' );
+register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
+
+
+/**
+ * Compatability: array_replace_recursive() is PHP 5.3 and greater
+ * For more: http://php.net/manual/en/function.array-replace-recursive.php
+ */
 
 if (!function_exists('array_replace_recursive')){
   function array_replace_recursive($array, $array1){
@@ -18,13 +34,10 @@ if (!function_exists('array_replace_recursive')){
 	    function recurse($array, $array1){
 	      foreach ($array1 as $key => $value)
 	      {
-	        // create new key in $array, if it is empty or not an array
 	        if (!isset($array[$key]) || (isset($array[$key]) && !is_array($array[$key])))
 	        {
 	          $array[$key] = array();
 	        }
-
-	        // overwrite the value in the base array
 	        if (is_array($value))
 	        {
 	          $value = recurse($array[$key], $value);
@@ -34,8 +47,6 @@ if (!function_exists('array_replace_recursive')){
 	      return $array;
 	    }
 	}
-
-    // handle the arguments, merge one by one
     $args = func_get_args();
     $array = $args[0];
     if (!is_array($array))
@@ -104,9 +115,10 @@ function pew_charts_init() {
 }
 add_action( 'init', 'pew_charts_init', 0 );
 
-/* ------------------------------------ */
-/* Making these accessible with iframes */
-/* ------------------------------------ */
+
+/** 
+ * Making charts accessible with iframes
+ */
 
 function pew_charts_rewrite( $rules ) {
 	$new = array(
@@ -116,7 +128,11 @@ function pew_charts_rewrite( $rules ) {
 }
 add_filter( 'rewrite_rules_array', 'pew_charts_rewrite' );
 
-//New Query Vars
+
+/** 
+ * New query vars for iframe rewrite rule Making these accessible with iframes
+ */
+
 function pew_charts_query_vars($query_vars) {
 	if (!in_array('iframe', $query_vars)) $query_vars[] = 'iframe';
 	return $query_vars;
@@ -143,7 +159,9 @@ function pew_charts_template( $template_path ) {
 add_filter( 'template_include', 'pew_charts_template', 1 );
 
 
-/* Header for iframe */
+/**
+ * Header for iframe 
+ */
 
 function get_pew_charts_header( $name = null ) {
 	do_action( 'get_header', $name);
@@ -162,9 +180,15 @@ function get_pew_charts_header( $name = null ) {
 /* -------------------------------------- */
 
 function pew_charts_scripts(){
-	if ( !wp_script_is( 'highcharts', 'registered' ) )
-		wp_register_script('highcharts', plugin_dir_url( __FILE__ ) . 'js/highcharts.min.js', array('jquery'), false, true);
-
+	if ( !wp_script_is( 'highcharts', 'registered' ) ){
+		$site_options = get_option( 'pew_charts' );
+		if ( $site_options['highcharts'] != '' ) {
+			$highcharts_url = $site_options['highcharts'];
+		} else {
+			$highcharts_url = 'http://code.highcharts.com/4.1.8/highcharts.js';	
+		}
+		wp_register_script('highcharts', $highcharts_url, array('jquery'), false, true);
+	}
 	if ( !wp_script_is( 'tinysort', 'registered' ) )
 		wp_register_script('tinysort', plugin_dir_url( __FILE__ ) . 'js/tinysort.min.js', array('jquery'), false, true);
 
@@ -257,8 +281,6 @@ function pew_chart_shortcode( $atts ) {
 	$html .= '<h3>' . $chart_shortcode_title . '</h3>';
 	$html .= wpautop(get_post_field('post_content', $chart->ID)); //Potential for infinite loop if the chart body has a [chart] shortcode in it.
 
-
-
 	$html .= '</div>';
 
 	$site_options = get_option( 'pew_charts' );
@@ -273,7 +295,10 @@ function pew_chart_shortcode( $atts ) {
 }
 add_shortcode( 'chart', 'pew_chart_shortcode' );
 
-//If it's a single chart page we need to be sure to prep the chart options properly and add them to the bottom of the page for the JavaScript
+/*
+ * If it's a single chart page we need to be sure to prep the chart options properly and add them to the bottom of the page for the JavaScript
+ */
+
 function pew_chart_prep_single_chart_page() {
 	if( get_post_type() == 'chart' && is_single() ) {
 		pew_chart_prep_chart_options();
@@ -288,7 +313,7 @@ function get_pew_chart_meta( $chart_id = false ) {
 		$chart_id = $post->ID;
 	}
 
-	//Use WordPress' caching functionality so if the same $chart_id is requested we can return the previous work we did...
+	// Use WordPress' caching functionality so if the same $chart_id is requested we can return the previous work we did...
 	$cache_key = 'pew_chart_options_' . $chart_id;
 	$data = wp_cache_get( $cache_key );
 
@@ -469,12 +494,14 @@ jQuery(document).ready(function($) {
 
 });
 </script>
-<?php
-}
+<?php }
 add_action( 'wp_footer', 'print_pew_chart_options', 99 );
 
 
-//Include the admin code.
+/* 
+ * Include the admin code.
+ */
+
 if( is_admin() ) {
 	include plugin_dir_path( __FILE__ ) . '/pew-charts-admin.php';
 	include plugin_dir_path( __FILE__ ) . '/pew-charts-csv-import.php';

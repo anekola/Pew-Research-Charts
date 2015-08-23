@@ -236,7 +236,9 @@ class ChartSettingsPage
         ?>
         <div class="wrap">
             <h2>Chart Settings</h2>
-            <p>Set your sitewide default settings here. Visit the <a href="http://api.highcharts.com/highcharts">HighCharts API documentation</a> to explore the custom arguments available. <b>For commercial use, HighCharts <a href="http://shop.highsoft.com/highcharts.html">requires a license</a>.</b></p>
+            <p>Set your sitewide default settings here. Visit the <a href="http://api.highcharts.com/highcharts">HighCharts API documentation</a> to explore the custom arguments available.</p>
+            <p><b>Note: For commercial use, Highcharts <a href="http://shop.highsoft.com/highcharts.html">requires a license</a>.</b> For personal and non-profit use, it is licenced under <a href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 License</a>.</p>
+            <p>This plugin is currently compatible with Highcharts 4.1.8</p>
             <form method="post" action="options.php">
             <?php
                 // This prints out all hidden setting fields
@@ -268,11 +270,19 @@ class ChartSettingsPage
         );
 
 	        add_settings_field(
-	            'credits', // ID
-	            'Credits', // Title
-	            array( $this, 'credits_callback' ), // Callback
+	            'highcharts', // ID
+	            'Highcharts.js', // Title
+	            array( $this, 'highcharts_callback' ), // Callback
 	            'pew-charts', // Page
 	            'setting_section_id' // Section
+	        );
+
+	        add_settings_field(
+	            'waypoints',
+	            'Waypoints.js',
+	            array( $this, 'waypoints_callback' ),
+	            'pew-charts',
+	            'setting_section_id'
 	        );
 
 	        add_settings_field(
@@ -284,9 +294,17 @@ class ChartSettingsPage
 	        );
 
 	        add_settings_field(
-	            'waypoints',
-	            'Waypoints',
-	            array( $this, 'waypoints_callback' ),
+	            'credits', // ID
+	            'Credits', // Title
+	            array( $this, 'credits_callback' ), // Callback
+	            'pew-charts', // Page
+	            'setting_section_id' // Section
+	        );
+
+	        add_settings_field(
+	            'iframe',
+	            'iframes',
+	            array( $this, 'iframe_callback' ),
 	            'pew-charts',
 	            'setting_section_id'
 	        );
@@ -308,6 +326,16 @@ class ChartSettingsPage
     public function sanitize( $input )
     {
         $new_input = array();
+        if( isset( $input['highcharts'] ) ) {
+        	// We check to see that the URL entered exists
+        	$file_headers = @get_headers($input['highcharts']);
+			if($file_headers[0] != 'HTTP/1.1 404 Not Found') {
+			    $new_input['highcharts'] = sanitize_text_field( $input['highcharts'] );
+			} else {
+				$new_input['highcharts'] = '';
+			}
+        }
+
         if( isset( $input['credits'] ) )
             $new_input['credits'] = sanitize_text_field( $input['credits'] );
 
@@ -334,10 +362,26 @@ class ChartSettingsPage
     /**
      * Get the settings option array and print one of its values
      */
+
+    public function highcharts_callback()
+    { 
+        printf(
+            '<input type="text" id="highcharts" class="large-text" name="pew_charts[highcharts]" value="%s" placeholder="Default: http://code.highcharts.com/4.1.8/highcharts.js"/>',
+            isset( $this->options['highcharts'] ) ? esc_attr( $this->options['highcharts']) : ''
+        );?>
+        <p class="description">The <a href="http://code.highcharts.com/">hosted version</a> of Highcharts is used by default. However, it is encouraged to use your own hosted version. Upload using the media uploader and simply paste in the URL above.</p>
+    <?php }
+
+    public function waypoints_callback()
+    { ?>
+        <input type="checkbox" name="pew_charts[waypoints]" id="waypoints" value="true" style="width:auto;" <?php checked( 'true', $this->options['waypoints'] ); ?> />
+        <p class="description">Activate to use <a href="http://imakewebthings.com/waypoints/">Waypoints</a> to draw shortcode charts when they are visible to user.</p>
+    <?php }
+
     public function credits_callback()
     {
         printf(
-            '<input type="text" id="credits" name="pew_charts[credits]" value="%s" />',
+            '<input type="text" id="credits" class="large-text" name="pew_charts[credits]" value="%s" />',
             isset( $this->options['credits'] ) ? esc_attr( $this->options['credits']) : ''
         );
     }
@@ -348,11 +392,6 @@ class ChartSettingsPage
         	<option <?php selected('disabled', $this->options['iframe']); ?> value="disabled">Disabled by default</option>
         	<option <?php selected('enabled', $this->options['iframe']); ?> value="enabled">Enabled by default</option>
         </select>
-    <?php }
-
-    public function waypoints_callback()
-    { ?>
-        <input type="checkbox" name="pew_charts[waypoints]" id="waypoints" value="true" style="width:auto;" <?php checked( 'true', $this->options['waypoints'] ); ?> /> <br/>Activate to use <a href="http://imakewebthings.com/waypoints/">Waypoints</a> to draw shortcode charts when they are visible to user.
     <?php }
 
     public function defaults_callback()

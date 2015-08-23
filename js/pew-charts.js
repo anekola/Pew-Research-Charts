@@ -479,6 +479,7 @@ jQuery(document).ready(function($) {
 				borderWidth: 0
 			},
 			legend: {
+				align: 'center',
 				borderWidth: 0
 			},
 			series: [],
@@ -515,7 +516,7 @@ jQuery(document).ready(function($) {
 		}
 
 		if( options.series.length < 2 ) {
-			if ( !options.legend ) options.legend = [];
+			if ( !options.legend ) options.legend = {};
 			options.legend.enabled = false;
 		}
 
