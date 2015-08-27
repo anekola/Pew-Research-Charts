@@ -116,7 +116,7 @@ function pew_charts_init() {
 add_action( 'init', 'pew_charts_init', 0 );
 
 
-/** 
+/**
  * Making charts accessible with iframes
  */
 
@@ -129,7 +129,7 @@ function pew_charts_rewrite( $rules ) {
 add_filter( 'rewrite_rules_array', 'pew_charts_rewrite' );
 
 
-/** 
+/**
  * New query vars for iframe rewrite rule Making these accessible with iframes
  */
 
@@ -160,7 +160,7 @@ add_filter( 'template_include', 'pew_charts_template', 1 );
 
 
 /**
- * Header for iframe 
+ * Header for iframe
  */
 
 function get_pew_charts_header( $name = null ) {
@@ -185,7 +185,7 @@ function pew_charts_scripts(){
 		if ( $site_options['highcharts'] != '' ) {
 			$highcharts_url = $site_options['highcharts'];
 		} else {
-			$highcharts_url = 'http://code.highcharts.com/4.1.8/highcharts.js';	
+			$highcharts_url = 'http://code.highcharts.com/4.1.8/highcharts.js';
 		}
 		wp_register_script('highcharts', $highcharts_url, array('jquery'), false, true);
 	}
@@ -198,12 +198,12 @@ function pew_charts_scripts(){
 	if ( !wp_script_is( 'highcharts-regression', 'registered' ) )
 		wp_register_script('highcharts-regression', plugin_dir_url( __FILE__ ) . 'js/highcharts-regression.min.js', array('highcharts'), false, true);
 
-	wp_register_script('pew-charts', plugin_dir_url( __FILE__ ) . 'js/pew-charts.js', array('highcharts','tinysort'), false, true);
-	wp_register_style('pew-charts', plugin_dir_url( __FILE__ ) . 'css/pew-charts.css');
+	wp_register_script('pew-research-charts', plugin_dir_url( __FILE__ ) . 'js/pew-research-charts.js', array('highcharts','tinysort'), false, true);
+	wp_register_style('pew-research-charts', plugin_dir_url( __FILE__ ) . 'css/pew-research-charts.css');
 
 	if ( get_post_type() == 'chart' ) {
-		wp_enqueue_script('pew-charts');
-		wp_enqueue_style('pew-charts');
+		wp_enqueue_script('pew-research-charts');
+		wp_enqueue_style('pew-research-charts');
 	}
 
 }
@@ -288,8 +288,8 @@ function pew_chart_shortcode( $atts ) {
 		wp_enqueue_script('waypoints');
 	}
 
-	wp_enqueue_script('pew-charts');
-	wp_enqueue_style('pew-charts');
+	wp_enqueue_script('pew-research-charts');
+	wp_enqueue_style('pew-research-charts');
 
 	return $html;
 }
@@ -498,11 +498,11 @@ jQuery(document).ready(function($) {
 add_action( 'wp_footer', 'print_pew_chart_options', 99 );
 
 
-/* 
+/*
  * Include the admin code.
  */
 
 if( is_admin() ) {
-	include plugin_dir_path( __FILE__ ) . '/pew-charts-admin.php';
-	include plugin_dir_path( __FILE__ ) . '/pew-charts-csv-import.php';
+	include plugin_dir_path( __FILE__ ) . '/pew-research-charts-admin.php';
+	include plugin_dir_path( __FILE__ ) . '/pew-research-charts-csv-import.php';
 }
